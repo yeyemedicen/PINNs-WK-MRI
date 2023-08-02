@@ -1,0 +1,108 @@
+#################################################
+#
+#   Input file for WK estimation using PINNs 
+#
+#################################################
+
+io:
+  write_path: 'results/'
+  
+data:
+  input_path: './data/transient/'
+  mesh: './data/154c_mid.h5'
+  files: ''
+
+
+windkessel:
+  boundaries: [3,4,5,6,7]
+  give_mean_pressure: True
+  normalize_pressure: False
+  inverse_problem:
+    apply: True
+    factorization: False
+    iter_rate: 1
+    iter_t0: 0
+    bnds: [3,4,5,6,7]
+    search: ['Rd','Rp','C']
+    Rtot_range: [12,300]
+    Rd_range: {
+                3: [1,6],
+                4: [10,40],
+                5: [10,40],
+                6: [10,40],
+                7: [10,40],
+              }
+    Rp_range: [0,4]
+    C_range: [0,250]
+    range_distance_reg: False
+    couplingRdC: True
+    RC_value: 0.9990605078394973
+
+W&B:
+  apply: False
+
+Tracking_gradients:
+  terms: ['phys','data','wk','bc','initial','pmean','gradp']
+
+XDMF:
+  save: False
+  epoch_rate: 10 
+
+# the hyperparameters have been adjusted for debugging... go to the article for use the same as in the paper.
+
+PINNs:
+  architecture: '03'
+  divergence-free: False
+  Fourier-Features:
+    apply: False
+    sigma: 10
+  pretrain:
+    apply: False
+    model: 'path_to_model'
+    loading_nets: ['u','p','pi']
+  hidden_layers: 7
+  hidden_layers_pi: 2
+  neurons_per_layer: 50
+  neurons_per_layer_pi: 4
+  epochs: 2
+  batchsize: 1024
+  activation_function: 'swish'
+  activation_function_pi: 'swish'
+  seed: 315
+  adding_Pt0: False
+  adding_pit_reg: False
+  temporal_upsampling_factor: 2
+  lambdas:
+    annealing:
+      apply: True
+      alpha: 0.1
+      mode: 'max/mean'
+      iter_rate: 10
+    manual_values:
+      phys: 1.5
+      data: 1
+      BC: 8
+      windkessel: 1
+      pmean: 20
+      initial: 2
+      gradp: 10
+  learning_rates:
+    state:
+      l: 1e-3
+      scheduler: True
+      factor: 0.4
+      threshold: 1e-3
+      patience: 20
+    pressure:
+      l: 1e-3
+      scheduler: True
+      factor: 0.4
+      threshold: 1e-3
+      patience: 20
+    params:
+      l: 1e-2
+      scheduler: True
+      factor: 0.4
+      threshold: 1e-3
+      patience: 20
+

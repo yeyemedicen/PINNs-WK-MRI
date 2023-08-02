@@ -1,0 +1,68 @@
+boundary_conditions:
+- gamma: 100000.0
+  id: 2
+  parameters: {U: 50}
+  profile: ../results/stokes/154_mid/u.h5
+  type: inflow
+  waveform: U
+- id: 1
+  type: dirichlet
+  value: ['0', '0', '0']
+- id: 3
+  parameters: {C: 0, R_d: 1650, R_p: 98, eps: 0.016666, p0: 105058.041283}
+  type: windkessel
+- id: 4
+  parameters: {C: 0, R_d: 12023, R_p: 713.0, eps: 0.016666, p0: 105058.041283}
+  type: windkessel
+- id: 5
+  parameters: {C: 0, R_d: 12023, R_p: 713, eps: 0.016666, p0: 105058.041283}
+  type: windkessel
+- id: 6
+  parameters: {C: 0, R_d: 10143, R_p: 602, eps: 0.016666, p0: 105058.041283}
+  type: windkessel
+- id: 7
+  parameters: {C: 0, R_d: 11609, R_p: 689, eps: 0.016666, p0: 105058.041283}
+  type: windkessel
+fem:
+  DC_in_update: true
+  convection_skew_symmetric: true
+  fix_pressure: false
+  fix_pressure_point: [0.0, 0.0, 0.0]
+  pressure_space: p1
+  stabilization:
+    backflow_boundaries: [3, 4, 5, 6, 7]
+    forced_normal:
+      boundaries: [3, 4, 5, 6]
+      enabled: false
+      gamma: 100.0
+      type: explicit
+    monolithic: {consistent: false, graddiv: false, infsup: pspg, pressure_stab_constant: 1.0}
+    streamline_diffusion: {Cinv: null, enabled: false, length_scale: metric, parameter: standard,
+      parameter_element_constant: true}
+  strain_symmetric: false
+  velocity_space: p1
+fluid: {density: 1.06, dynamic_viscosity: 0.035, stokes: true}
+io:
+  restart: {path: '', time: 0}
+  write_checkpoints: true
+  write_hdf5_timeseries: false
+  write_path: ../results/154mid_steady_plug/
+  write_velocity: tentative
+  write_xdmf: true
+linear_solver: {inputfile: ./inputfiles/pc/fracstep_p-gmres-modgs.yaml}
+mesh: ../mesh/154_lowres/154c_mid.h5
+timemarching:
+  T: 0.5
+  checkpoint_dt: 0.1
+  dt: 0.001
+  fractionalstep: {coupled_velocity: false, flux_report_normalize_boundary: 1, robin_bc_velocity_scheme: implicit,
+    scheme: CT, transpiration_bc_projection: robin}
+  monolithic:
+    nonlinear: {atol: 1e-06, init_steps: 30, maxit: 20, method: constant_extrapolation,
+      report: 1, rtol: 1e-16, stol: 0.0, use_aitken: 1}
+    theta: 1
+    timescheme: gmp
+  report: 1
+  velocity_pressure_coupling: fractionalstep
+  write_dt: 0.1
+windkessel: {implicit: true}
